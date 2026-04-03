@@ -53,7 +53,7 @@ When a model is trained on frames from Person A and tested on frames from Person
 *4-rep session showing rep 1 2 and 3 classified as perfect, rep 4 as shoulder dip — with exact joint angles logged per rep.*
 ![Dashboard](assets/ss_shoulder_dip.png)
 
-> More screenshots coming — elbow flare, shoulder dip, and shallow detection.
+
 
 ---
 
@@ -175,7 +175,7 @@ Systematic collapse toward `perfect` across all classes — caused by inter-subj
 
 The trained model (`rehabmate_v3.pkl`, 33MB) is hosted on Google Drive due to GitHub file size limits.
 
-> **[⬇️ Download rehabmate_v3.pkl from Google Drive](YOUR_GDRIVE_LINK_HERE)**
+> **[⬇️ Download rehabmate_v3.pkl from Google Drive](https://drive.google.com/drive/folders/1h679uY9WZF4rBANn-7pKvMO7qQXSyl4r?usp=drive_link)**
 
 Place it in the root `RehabMate/Model/` directory before running `app.py`.
 
