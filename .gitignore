@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+*.pkl
+*.pth
+*.h5
+pushup_balanced.csv
+pushup_data_v2.csv
+pushup_data_v2_old.csv
+pushup_data_with_subjects.csv
+calibration_profile.json
+user_calibration.json
+venv/
+.venv/
+.DS_Store
+Thumbs.db
+*.log

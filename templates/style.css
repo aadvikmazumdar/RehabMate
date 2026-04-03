@@ -1,0 +1,381 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.container {
+    max-width: 1600px;
+    margin: 0 auto;
+}
+
+header {
+    text-align: center;
+    color: white;
+    margin-bottom: 30px;
+}
+
+header h1 {
+    font-size: 3em;
+    margin-bottom: 10px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+header p {
+    font-size: 1.2em;
+    opacity: 0.9;
+}
+
+.main-content {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 20px;
+}
+
+.video-section, .metrics-section {
+    background: white;
+    border-radius: 15px;
+    padding: 25px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.video-section h2, .metrics-section h2 {
+    margin-bottom: 20px;
+    color: #333;
+    font-size: 1.5em;
+}
+
+.video-container {
+    position: relative;
+    width: 100%;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #000;
+}
+
+.video-feed {
+    width: 100%;
+    display: block;
+    border-radius: 10px;
+}
+
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+}
+
+.metric-card {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 15px;
+    border-left: 4px solid #ccc;
+    transition: all 0.3s ease;
+}
+
+.metric-card h3 {
+    font-size: 0.9em;
+    color: #666;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.metric-value {
+    font-size: 2.2em;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.metric-status {
+    font-size: 0.9em;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.metric-range {
+    font-size: 0.75em;
+    color: #999;
+    margin-bottom: 10px;
+}
+
+.metric-bar {
+    width: 100%;
+    height: 6px;
+    background: #e0e0e0;
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.metric-fill {
+    height: 100%;
+    transition: width 0.3s ease, background-color 0.3s ease;
+    border-radius: 3px;
+}
+
+/* Status colors */
+.status-good {
+    border-left-color: #28a745;
+}
+
+.status-good .metric-value {
+    color: #28a745;
+}
+
+.status-good .metric-status {
+    color: #28a745;
+}
+
+.status-good .metric-fill {
+    background: #28a745;
+}
+
+.status-warning {
+    border-left-color: #ffc107;
+}
+
+.status-warning .metric-value {
+    color: #ffc107;
+}
+
+.status-warning .metric-status {
+    color: #ffc107;
+}
+
+.status-warning .metric-fill {
+    background: #ffc107;
+}
+
+.status-bad {
+    border-left-color: #dc3545;
+}
+
+.status-bad .metric-value {
+    color: #dc3545;
+}
+
+.status-bad .metric-status {
+    color: #dc3545;
+}
+
+.status-bad .metric-fill {
+    background: #dc3545;
+}
+
+footer {
+    text-align: center;
+    color: white;
+    margin-top: 30px;
+    padding: 20px;
+    opacity: 0.8;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+    .main-content {
+        grid-template-columns: 1fr;
+    }
+    
+    .metrics-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    header h1 {
+        font-size: 2em;
+    }
+    
+    .metrics-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .metrics-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Position Status Indicator */
+.position-status {
+    background: white;
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    transition: all 0.3s ease;
+}
+
+.status-icon {
+    font-size: 4em;
+    min-width: 80px;
+    text-align: center;
+}
+
+.status-text {
+    flex: 1;
+}
+
+.status-text h3 {
+    margin: 0 0 5px 0;
+    font-size: 1.5em;
+}
+
+.status-text p {
+    margin: 0 0 10px 0;
+    color: #666;
+}
+
+.confidence-bar {
+    width: 100%;
+    height: 12px;
+    background: #e0e0e0;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.confidence-fill {
+    height: 100%;
+    background: #28a745;
+    transition: width 0.3s ease, background 0.3s ease;
+    border-radius: 6px;
+}
+
+/* Status-specific styling */
+.status-ready {
+    border-left: 6px solid #28a745;
+}
+
+.status-ready .status-icon {
+    color: #28a745;
+}
+
+.status-almost {
+    border-left: 6px solid #ffc107;
+}
+
+.status-almost .status-icon {
+    color: #ffc107;
+}
+
+.status-waiting {
+    border-left: 6px solid #dc3545;
+}
+
+.status-waiting .status-icon {
+    color: #dc3545;
+}
+
+/* Rep Counter Section */
+.rep-counter-section {
+    background: white;
+    border-radius: 15px;
+    padding: 25px;
+    margin-bottom: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 20px;
+    align-items: center;
+}
+
+.rep-display {
+    text-align: center;
+    padding: 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 10px;
+    min-width: 120px;
+}
+
+.rep-number {
+    font-size: 4em;
+    font-weight: bold;
+    color: white;
+    line-height: 1;
+}
+
+.rep-label {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.9em;
+    margin-top: 5px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.rep-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.stat-label {
+    font-weight: 600;
+    color: #666;
+    min-width: 80px;
+}
+
+.stat-value {
+    font-size: 1.1em;
+    font-weight: bold;
+    color: #333;
+}
+
+.phase-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.9em;
+    font-weight: 600;
+}
+
+.phase-ready { background: #6c757d; color: white; }
+.phase-descending { background: #ffc107; color: black; }
+.phase-bottom { background: #17a2b8; color: white; }
+.phase-ascending { background: #28a745; color: white; }
+.phase-top { background: #007bff; color: white; }
+.phase-rest { background: #6f42c1; color: white; }
+
+.reset-button {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1em;
+    font-weight: 600;
+    transition: background 0.3s ease;
+}
+
+.reset-button:hover {
+    background: #c82333;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .rep-counter-section {
+        grid-template-columns: 1fr;
+        text-align: center;
+    }
+    
+    .rep-stats {
+        align-items: center;
+    }
+}

@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RehabMate</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:       #0a0c10;
+    --surface:  #111318;
+    --border:   #1e2128;
+    --text:     #e8eaf0;
+    --muted:    #5a6070;
+    --green:    #00e676;
+    --orange:   #ff9100;
+    --red:      #ff1744;
+    --blue:     #2979ff;
+    --cyan:     #00e5ff;
+    --mono:     'Space Mono', monospace;
+    --sans:     'DM Sans', sans-serif;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 28px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+  }
+  .logo {
+    font-family: var(--mono);
+    font-size: 1.1rem;
+    letter-spacing: 0.12em;
+    color: var(--green);
+  }
+  .logo span { color: var(--muted); }
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .status-pill {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    padding: 4px 12px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    letter-spacing: 0.08em;
+  }
+  .status-pill.ready { border-color: var(--green); color: var(--green); }
+  .status-pill.calibrating { border-color: var(--cyan); color: var(--cyan); }
+  .btn-header {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    padding: 6px 16px;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.15s;
+  }
+  .btn-header:hover { border-color: var(--text); color: var(--text); }
+  .btn-header.danger:hover { border-color: var(--red); color: var(--red); }
+  .btn-header.calib:hover { border-color: var(--cyan); color: var(--cyan); }
+
+  .stats-bar {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+  }
+  .stat {
+    flex: 1;
+    padding: 12px 20px;
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .stat:last-child { border-right: none; }
+  .stat-label {
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    text-transform: uppercase;
+    font-family: var(--mono);
+  }
+  .stat-value {
+    font-family: var(--mono);
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1;
+  }
+  .stat-value.green { color: var(--green); }
+  .stat-value.orange { color: var(--orange); }
+  .stat-value.red { color: var(--red); }
+
+  .main {
+    display: grid;
+    grid-template-columns: 55% 1fr;
+    height: calc(100vh - 110px);
+  }
+
+  .video-panel {
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .video-header {
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    text-transform: uppercase;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .live-dot {
+    width: 7px; height: 7px;
+    background: var(--red);
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 6px;
+    animation: pulse 1.2s ease infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+  .video-feed {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: contain;
+  }
+
+  .right-panel {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* ── Calibration overlay ── */
+  .calib-overlay {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 30px;
+    flex: 1;
+    text-align: center;
+    gap: 20px;
+  }
+  .calib-overlay.active { display: flex; }
+  .calib-icon {
+    font-size: 3rem;
+    color: var(--cyan);
+    font-family: var(--mono);
+    letter-spacing: 0.1em;
+  }
+  .calib-title {
+    font-family: var(--mono);
+    font-size: 1.3rem;
+    color: var(--cyan);
+    letter-spacing: 0.08em;
+  }
+  .calib-desc {
+    color: var(--muted);
+    font-size: 0.9rem;
+    max-width: 340px;
+    line-height: 1.6;
+  }
+  .calib-progress {
+    width: 260px;
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-top: 10px;
+  }
+  .calib-progress-fill {
+    height: 100%;
+    background: var(--cyan);
+    border-radius: 3px;
+    transition: width 0.4s ease;
+    width: 0%;
+  }
+  .calib-reps {
+    font-family: var(--mono);
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .calib-reps span { color: var(--muted); font-size: 1.2rem; }
+  .calib-steps {
+    text-align: left;
+    color: var(--muted);
+    font-size: 0.8rem;
+    line-height: 2;
+  }
+  .calib-steps strong { color: var(--text); }
+
+  /* ── Normal panel (form card + table) ── */
+  .normal-panel { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+  .normal-panel.hidden { display: none; }
+
+  .form-card {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    min-height: 90px;
+  }
+  .form-label-big {
+    font-family: var(--mono);
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    transition: color 0.3s;
+  }
+  .form-label-big.perfect      { color: var(--green); }
+  .form-label-big.shoulder_dip { color: var(--orange); }
+  .form-label-big.hip_sag      { color: var(--orange); }
+  .form-label-big.elbow_flare  { color: var(--orange); }
+  .form-label-big.shallow      { color: var(--orange); }
+  .form-label-big.fatigue_hip_sag { color: var(--red); }
+  .form-label-big.na           { color: var(--muted); }
+  .form-conf {
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+  .form-feedback {
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin-top: 6px;
+    font-weight: 300;
+  }
+  .form-right {
+    margin-left: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+  }
+
+  .prob-bars { width: 180px; }
+  .prob-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 3px;
+  }
+  .prob-name {
+    font-family: var(--mono);
+    font-size: 0.55rem;
+    color: var(--muted);
+    width: 70px;
+    text-align: right;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .prob-bar-bg {
+    flex: 1;
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .prob-bar-fill {
+    height: 100%;
+    border-radius: 2px;
+    background: var(--green);
+    transition: width 0.4s ease;
+  }
+  .prob-pct {
+    font-family: var(--mono);
+    font-size: 0.55rem;
+    color: var(--muted);
+    width: 26px;
+    text-align: right;
+  }
+
+  .table-header-row {
+    padding: 10px 24px;
+    border-bottom: 1px solid var(--border);
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    text-transform: uppercase;
+    display: flex;
+    justify-content: space-between;
+  }
+  .table-scroll {
+    flex: 1;
+    overflow-y: auto;
+  }
+  .table-scroll::-webkit-scrollbar { width: 4px; }
+  .table-scroll::-webkit-scrollbar-thumb { background: var(--border); }
+
+  .rep-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .rep-table th {
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 8px 14px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    background: var(--bg);
+  }
+  .rep-table td {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    padding: 9px 14px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+  }
+  .rep-table tr:hover td { background: var(--surface); }
+  .rep-table tr.new-row td { animation: rowIn 0.4s ease; }
+  @keyframes rowIn {
+    from { opacity: 0; transform: translateX(-8px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-size: 0.6rem;
+    letter-spacing: 0.06em;
+    font-weight: 700;
+    font-family: var(--mono);
+  }
+  .badge.perfect       { background: rgba(0,230,118,0.15); color: var(--green); }
+  .badge.shoulder_dip  { background: rgba(255,145,0,0.15);  color: var(--orange); }
+  .badge.hip_sag       { background: rgba(255,145,0,0.15);  color: var(--orange); }
+  .badge.elbow_flare   { background: rgba(255,145,0,0.15);  color: var(--orange); }
+  .badge.shallow       { background: rgba(255,145,0,0.15);  color: var(--orange); }
+  .badge.fatigue_hip_sag { background: rgba(255,23,68,0.15); color: var(--red); }
+
+  .empty-table {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 200px;
+    color: var(--muted);
+    gap: 8px;
+  }
+  .empty-table span:first-child { font-size: 2rem; }
+  .empty-table span:last-child {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+  }
+
+  .beep-flash {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 230, 118, 0.08);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.05s;
+    z-index: 999;
+  }
+  .beep-flash.active { opacity: 1; }
+</style>
+</head>
+<body>
+
+<div class="beep-flash" id="beepFlash"></div>
+
+<header>
+  <div class="logo">REHAB<span>MATE</span> <span style="font-size:0.7rem;margin-left:8px">v2.0</span></div>
+  <div class="header-right">
+    <div class="status-pill" id="positionPill">WAITING</div>
+    <div class="status-pill" id="statePill">READY</div>
+    <button class="btn-header calib" onclick="recalibrate()">CALIBRATE</button>
+    <button class="btn-header danger" onclick="resetSession()">RESET</button>
+  </div>
+</header>
+
+<div class="stats-bar">
+  <div class="stat">
+    <div class="stat-label">Total Reps</div>
+    <div class="stat-value" id="statReps">0</div>
+  </div>
+  <div class="stat">
+    <div class="stat-label">Valid Reps</div>
+    <div class="stat-value green" id="statValid">0</div>
+  </div>
+  <div class="stat">
+    <div class="stat-label">Last Form</div>
+    <div class="stat-value" id="statLastForm">—</div>
+  </div>
+  <div class="stat">
+    <div class="stat-label">Accuracy</div>
+    <div class="stat-value" id="statAccuracy">—</div>
+  </div>
+</div>
+
+<div class="main">
+  <div class="video-panel">
+    <div class="video-header">
+      <div><span class="live-dot"></span>LIVE FEED</div>
+      <div id="cameraState">DETECTING...</div>
+    </div>
+    <img src="/video_feed" class="video-feed" alt="Camera Feed">
+  </div>
+
+  <div class="right-panel">
+
+    <!-- Calibration overlay -->
+    <div class="calib-overlay" id="calibOverlay">
+      <div class="calib-icon">///</div>
+      <div class="calib-title">CALIBRATION</div>
+      <div class="calib-desc">
+        Get into pushup position and perform 5 slow, perfect pushups.
+        The system will learn your personal range of motion.
+      </div>
+      <div class="calib-reps">
+        <span id="calibDone">0</span> <span>/ 5</span>
+      </div>
+      <div class="calib-progress">
+        <div class="calib-progress-fill" id="calibBar"></div>
+      </div>
+      <div class="calib-steps">
+        <strong>1.</strong> Get into plank position<br>
+        <strong>2.</strong> Lower slowly to the bottom<br>
+        <strong>3.</strong> Push back up fully<br>
+        <strong>4.</strong> Repeat 5 times<br>
+        <strong>5.</strong> Rep 1 is discarded (warmup)
+      </div>
+    </div>
+
+    <!-- Normal panel -->
+    <div class="normal-panel" id="normalPanel">
+      <div class="form-card">
+        <div>
+          <div class="form-label-big na" id="formLabel">WAITING...</div>
+          <div class="form-conf" id="formConf"></div>
+          <div class="form-feedback" id="formFeedback">Get into pushup position</div>
+        </div>
+        <div class="form-right">
+          <div class="prob-bars" id="probBars"></div>
+        </div>
+      </div>
+
+      <div class="table-header-row">
+        <span>REP HISTORY</span>
+        <span id="repCount">0 reps</span>
+      </div>
+      <div class="table-scroll">
+        <div class="empty-table" id="emptyTable">
+          <span></span>
+          <span>START YOUR REPS</span>
+        </div>
+        <table class="rep-table" id="repTable" style="display:none">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Form</th>
+              <th>Conf</th>
+              <th>Elbow</th>
+              <th>Hip</th>
+              <th>Flare</th>
+              <th>Shoulder Elev</th>
+              <th>Body Line</th>
+            </tr>
+          </thead>
+          <tbody id="repTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<audio id="beepSound" preload="auto">
+  <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YWoGAACBhYqPk5eZm5ycm5mWk4+LhoF8d3FsZ2JdWFNOS0dEQT48Ojk4Nzc3ODk6PD5BREhMUFRYXGBkZ2tub3FzdHV1dXRzcnBubGppZ2VjYWBfXl5eXl9gYWNlZ2lrbW9xcnN0dHRzdHNycXBvbWxramhmZWRjY2NkZWdoam1vcXN1d3h5enp6eXh3dnV0c3JxcG9ubWtpZ2VjYWBfXl5eX2BhYmRmZ2lrbW9xc3V2d3h4eHh3dnV0c3JxcG9vbm1sbGxsbW5vcXJ0dnd5en1+f4CBgYGBgH9+fHp4dnRycG5sa2loZ2dmZ2hpa2xtb3Fyc3V2d3h4eHd3dnV0c3JxcXBvbm5tbW1tbW5vcHFyc3R2d3l6e3x9fn5/f39/fn18e3p4d3Z0c3FwbW1sa2tsa2xtbm9xcnN0dXZ3d3h4eHd3dnV0c3JxcG9vbm5ubW5ub3BxcnN0dXd4eXp7fH19fn5+fn5+fX18e3p5eHd2dXRycXBvbm1sa2trbGxtbnBxcnR1dnd4eXl6enp6enl4d3Z1dHNycXBvb25ubm9vcHFyc3R1dnd4eXp7e3x8fHx8fHx7enl4d3Z1dHNycXBvbm1sa2tsbW5vcHFyc3R1dnd4eXl6enp6eXh3dnV0c3JxcG9vbm5vb3BxcnN0dXZ3eHl6e3x9fX5+fn5+fX18e3p5eHd2dXNycXBvbm1sa2trbGxtbnBxcnR1dnd4eXl6enl5eHd2dXRzcnFwb29ubm5vb3Byc3R1dnd4eXp7fHx9fX19fX18e3p5eHd2dXNycXBvbm1sa2trbW1ub3Fyc3R1dnd4eXl6enl4d3Z1dHNycXBvb25ub29wcXJzc3V2d3h5eXp7e3x9fX19fX18e3p5eHd2dXNycXBvbm1sa2trbW1ub3Bxc3N1dnd4eHl5eXl5eHd3dnV0c3JxcXBvcG9wkZGSkpKSkpGSkpGRkZGRkZCRkZGSkpKSkpGRkJCPkI+QkJCQkI+Pj4+PkJCQkZGRkpOTlJSUlJSTkpGQj46NjIuKiomIiIiIiImKi4yOj5CSkpOUlJSUlJOSkpGQj4+OjYyLiomIiIiJiouMjY+QkZKTlJSVlZWVlJOSkZCPjo2Mi4qJiIiIiImKi4yNj5CSk5SVlZWWlpWVlJOSkZCPjo2Mi4qJiIeHiImKi4yNjpCTk5SVlZaWl5eXlpWUk5KQj42Mi4qIh4eHiImKi4yNjpCSkpSVlZaWl5eXlpWUk5KQj4+OjIqJiIeHiImKi4yNjpCRkpOUlZaWl5eXlpWUk5GQjo2LiomIh4aGiImKi4yNjpCRkpOTlJWWlpeXlpWUk5KQjo2LiomHhoWFhoeIiYqLjI2Oj5GSkpOUlZaWlpWUk5GQjo2LiomHhoWFhoeIiYqKjI2Oj5CRkpOTlJWVlpWUk5GQjo2LiomHhoUFhYaIiImKi4yNjpCRkpKTlJSVlZWUkpGQjo2LiomHhoUFhYaHiYqLjI2Oj5CRkpOTlJSVlJOSkI+OjIuKiYeGhYSEhYaHiImKi4yNjo+QkZKTk5SUlJOSkI+OjIuKiIeGhYSEhYaHiImKi4yNjo+QkZKSk5SUlJOSkI+OjIuKiIeGhYSEhYaHiImKi4yNjo+QkZKSk5SUlJOSkI+OjIuKiIeGhQSEhYaHiYqLjI2Oj5CRkpKTk5STkpGPjo2LioiHhoUEhISFhoeIiouMjY6Pj5CRkpKTk5KSkI+OjIqJiIaFhIODhIWGh4iJiouMjY6Pj5CRkZKSkpGQj46Mi4qIh4WEg4OEhYaHiImKi4uMjY6Pj5CQkZGRj46NjIsKiYiHhoSEg4OEhYaHiImJiouLjI2OjpCQkI+OjYyLiomIh4WEg4ODhIWGh4iIiYqKi4yMjY6OkI+OjYyLiomIh4WEg4OEhIWGh4iIiYqKi4yMjY6Pj46NjIuKiYiGhYOCgoOEhYaHiIiJiouLjIyNjo6PjoyLioqJh4aFg4KCg4SFhoaHiImJiouLjIyNjY6NjIuKiYiHhYSCgYKDhIWGh4eIiImJiouLjIyNjY6NjIuKiYiHhYSCgYKDhIWGh4eIiImJiouKi4uMjIuLioqJiIeGhIOCgYGCg4SFhYaHh4iIiYmJioqKi4qKiomIh4aFhIOCgYGCg4SFhYaGh4iIiIiJiYmKioqJiYiHh4WEg4KBgYGCg4OEhYaGh4iIiIiJiYmJiYmIiIiHh4aGhYQEg4KBgIGBgoOEhYWGhoaHh4eIiIiHh4eHhoaGhYWEg4KBgICBgYKCg4SEhYWGhoaGh4eHh4eHh4aGhoWFhYQDg4KBgICAgYGCg4QEhYWFhoaGhoaHh4eGhoeGhYWFhYQDg4KBgICAgYGCg4MEhYWFhYaGhoaGhoaGhYWFhYQEg4KBgICAgYGCgoMDhISFhYWFhoaFhYaGhoWFhYUFhIOCgYCAgICBgYKCg4MEhISEhYWFhYWGhYaFhQWFhIQEgwKCgYCAgICBgYKCgoMDhISEhISFhYWFhQWFhYSEhASDgoKBgICAgICBgYKCgoMDg4SEhISEhISFhQWFhQQEg4OCgoGAgICAgYGCgoKCg4MDhISEhISEhISEhISEhIODg4OCgoGBgICAgIGBgYKCgoKDg4ODhISEhISEhISEg4ODg4KCgoKBgYCAgICAgYGBgoKCgoODg4OEhIODg4ODg4OCgoKCgoGBgYCAgICAgIGBgYKCgoKDg4ODg4ODg4OCgoKCgYGBgYCAgICAgIGBgYGBgoKCgoKDg4ODg4ODgoKCgoKCgYGBgYCAgICAgIGBgYGCgoKCgoKDg4ODg4KCgoKCgYGBgYCAgIA=" type="audio/wav">
+</audio>
+
+<script>
+// ─── State ────────────────────────────────────────────────────────────────────
+let knownReps   = 0;   // how many rep rows we've already rendered
+let isResetting = false; // guard: skip one poll cycle after reset
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+function labelClass(label) {
+  return label ? label.toLowerCase().replace(/ /g, '_') : 'na';
+}
+function labelDisplay(label) {
+  if (!label || label === 'N/A') return 'WAITING...';
+  return label.toUpperCase().replace(/_/g, ' ');
+}
+function confColor(conf) {
+  if (conf >= 0.8) return 'var(--green)';
+  if (conf >= 0.6) return 'var(--orange)';
+  return 'var(--red)';
+}
+
+// ─── Beep / flash ─────────────────────────────────────────────────────────────
+function playBeep() {
+  const flash = document.getElementById('beepFlash');
+  flash.classList.add('active');
+  setTimeout(() => flash.classList.remove('active'), 150);
+  try {
+    const ctx  = new (window.AudioContext || window.webkitAudioContext)();
+    const osc  = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.frequency.value = 880;
+    osc.type = 'sine';
+    gain.gain.setValueAtTime(0.4, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.25);
+  } catch(e) {}
+}
+
+// ─── Calibration UI ───────────────────────────────────────────────────────────
+function updateCalibUI(calib) {
+  const overlay = document.getElementById('calibOverlay');
+  const normal  = document.getElementById('normalPanel');
+  const pill    = document.getElementById('positionPill');
+
+  if (!calib.done) {
+    overlay.classList.add('active');
+    normal.classList.add('hidden');
+    pill.textContent = 'CALIBRATING';
+    pill.className   = 'status-pill calibrating';
+    document.getElementById('calibDone').textContent = calib.reps_done || 0;
+    const pct = Math.min(100, ((calib.reps_done || 0) / (calib.reps_required || 5)) * 100);
+    document.getElementById('calibBar').style.width  = pct + '%';
+  } else {
+    overlay.classList.remove('active');
+    normal.classList.remove('hidden');
+  }
+}
+
+// ─── Form card ────────────────────────────────────────────────────────────────
+function updateFormCard(form) {
+  const label = form.label || 'N/A';
+  const conf  = form.confidence || 0;
+  const lc    = labelClass(label);
+
+  const el = document.getElementById('formLabel');
+  el.textContent = labelDisplay(label);
+  el.className   = `form-label-big ${lc === 'n/a' ? 'na' : lc}`;
+
+  document.getElementById('formConf').textContent =
+    label !== 'N/A' ? `${(conf * 100).toFixed(0)}% confidence` : '';
+  document.getElementById('formFeedback').textContent =
+    form.feedback || 'Get into pushup position';
+
+  const probs  = form.all_probs || {};
+  const sorted = Object.entries(probs).sort((a, b) => b[1] - a[1]);
+  document.getElementById('probBars').innerHTML = sorted.map(([k, v]) => `
+    <div class="prob-row">
+      <div class="prob-name">${k.replace(/_/g, ' ')}</div>
+      <div class="prob-bar-bg">
+        <div class="prob-bar-fill" style="width:${(v * 100).toFixed(0)}%;
+          background:${v > 0.5 ? 'var(--green)' : v > 0.3 ? 'var(--orange)' : 'var(--muted)'}">
+        </div>
+      </div>
+      <div class="prob-pct">${(v * 100).toFixed(0)}%</div>
+    </div>`).join('');
+}
+
+// ─── Rep table ────────────────────────────────────────────────────────────────
+function addRepRow(rep, animate) {
+  document.getElementById('emptyTable').style.display = 'none';
+  document.getElementById('repTable').style.display   = 'table';
+
+  const lc  = labelClass(rep.label);
+  const row = document.createElement('tr');
+  if (animate) row.className = 'new-row';
+  row.innerHTML = `
+    <td style="color:var(--muted)">#${rep.rep}</td>
+    <td><span class="badge ${lc}">${labelDisplay(rep.label)}</span></td>
+    <td style="color:${confColor(rep.confidence / 100)}">${rep.confidence}%</td>
+    <td>${rep.elbow}°</td>
+    <td>${rep.hip}°</td>
+    <td>${rep.elbow_flare}°</td>
+    <td>${rep.shoulder_elevation}</td>
+    <td>${rep.body_line}°</td>
+  `;
+
+  const tbody = document.getElementById('repTableBody');
+  tbody.insertBefore(row, tbody.firstChild);
+  if (animate) setTimeout(() => row.classList.remove('new-row'), 500);
+}
+
+// ─── Stats bar ────────────────────────────────────────────────────────────────
+function updateStats(stateInfo, repHistory) {
+  const reps  = stateInfo.rep_count       || 0;
+  const valid = stateInfo.valid_rep_count || 0;
+
+  document.getElementById('statReps').textContent  = reps;
+  document.getElementById('statValid').textContent = valid;
+  document.getElementById('repCount').textContent  = `${reps} rep${reps !== 1 ? 's' : ''}`;
+
+  if (repHistory.length > 0) {
+    const last = repHistory[repHistory.length - 1];
+    const lel  = document.getElementById('statLastForm');
+    lel.textContent = labelDisplay(last.label);
+    const lc = labelClass(last.label);
+    lel.className = `stat-value ${lc === 'perfect' ? 'green' : lc === 'fatigue_hip_sag' ? 'red' : 'orange'}`;
+
+    const perfCount = repHistory.filter(r => r.label === 'perfect').length;
+    const acc = Math.round((perfCount / repHistory.length) * 100);
+    const accEl = document.getElementById('statAccuracy');
+    accEl.textContent = `${acc}%`;
+    accEl.className   = `stat-value ${acc >= 80 ? 'green' : acc >= 50 ? 'orange' : 'red'}`;
+  }
+}
+
+// ─── Position / state pills ───────────────────────────────────────────────────
+function updatePosition(pos, state) {
+  const pill = document.getElementById('positionPill');
+  if (pos.in_position) {
+    pill.textContent = 'IN POSITION';
+    pill.className   = 'status-pill ready';
+  } else {
+    pill.textContent = 'WAITING';
+    pill.className   = 'status-pill';
+  }
+  document.getElementById('statePill').textContent    = state.state || 'READY';
+  document.getElementById('cameraState').textContent  = pos.message || '';
+}
+
+// ─── Poll loop ────────────────────────────────────────────────────────────────
+async function poll() {
+  try {
+    // If we just clicked Reset, skip this cycle so stale backend data
+    // doesn't immediately repopulate the now-cleared UI.
+    if (!isResetting) {
+      const [stateRes, formRes, histRes, posRes, beepRes, calibRes] = await Promise.all([
+        fetch('/get_state_info'),
+        fetch('/get_form'),
+        fetch('/get_rep_history'),
+        fetch('/get_position_status'),
+        fetch('/get_beep'),
+        fetch('/get_calibration_status'),
+      ]);
+
+      const state    = await stateRes.json();
+      const form     = await formRes.json();
+      const history  = await histRes.json();
+      const pos      = await posRes.json();
+      const beepData = await beepRes.json();
+      const calib    = await calibRes.json();
+
+      updateCalibUI(calib);
+      updateFormCard(form);
+      updateStats(state, history);
+      updatePosition(pos, state);
+
+      // ── Rep rows: catch up on any reps we haven't rendered yet ──────────────
+      // This replaces the old beep-gated approach which missed reps if the
+      // poll fired slightly after the one-shot beep_pending was consumed.
+      if (history.length > knownReps) {
+        // Render all new reps (oldest-first so newest ends up at top of table)
+        const newReps = history.slice(knownReps);
+        newReps.forEach((rep, i) => {
+          const isNewest = (i === newReps.length - 1);
+          addRepRow(rep, isNewest); // animate only the newest row
+        });
+        knownReps = history.length;
+
+        // Play beep for a new rep regardless of whether /get_beep already fired
+        if (beepData.beep || newReps.length > 0) playBeep();
+      }
+    }
+  } catch(e) {
+    // silently ignore network blips
+  }
+
+  setTimeout(poll, 150);
+}
+
+// ─── Reset ────────────────────────────────────────────────────────────────────
+function resetSession() {
+  isResetting = true; // block next poll cycle
+
+  fetch('/reset_reps', { method: 'POST' })
+    .then(() => {
+      // Clear all UI synchronously after the server confirms reset
+      document.getElementById('statReps').textContent      = '0';
+      document.getElementById('statValid').textContent     = '0';
+      document.getElementById('statLastForm').textContent  = '—';
+      document.getElementById('statLastForm').className    = 'stat-value';
+      document.getElementById('statAccuracy').textContent  = '—';
+      document.getElementById('statAccuracy').className    = 'stat-value';
+      document.getElementById('repCount').textContent      = '0 reps';
+      document.getElementById('repTableBody').innerHTML    = '';
+      document.getElementById('repTable').style.display   = 'none';
+      document.getElementById('emptyTable').style.display = 'flex';
+      document.getElementById('formLabel').textContent     = 'WAITING...';
+      document.getElementById('formLabel').className       = 'form-label-big na';
+      document.getElementById('formConf').textContent      = '';
+      document.getElementById('formFeedback').textContent  = 'Get into pushup position';
+      document.getElementById('probBars').innerHTML        = '';
+      document.getElementById('statePill').textContent     = 'READY';
+
+      knownReps   = 0;
+      isResetting = false; // re-enable polling
+    })
+    .catch(() => { isResetting = false; });
+}
+
+// ─── Recalibrate ──────────────────────────────────────────────────────────────
+function recalibrate() {
+  if (!confirm('This will delete your current calibration and restart. Continue?')) return;
+  fetch('/recalibrate', { method: 'POST' }).then(() => resetSession());
+}
+
+// ─── Start ────────────────────────────────────────────────────────────────────
+poll();
+</script>
+</body>
+</html>
