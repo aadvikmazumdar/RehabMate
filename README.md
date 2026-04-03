@@ -50,7 +50,7 @@ When a model is trained on frames from Person A and tested on frames from Person
 ![Hip Sag Detected](assets/ss_hip_sag.png)
 
 ### Full Dashboard — Mixed Session
-*3-rep session showing rep 1 classified as hip_sag, reps 2 and 3 as perfect — with exact joint angles logged per rep.*
+*4-rep session showing rep 1 2 and 3 classified as perfect, rep 4 as shoulder dip — with exact joint angles logged per rep.*
 ![Dashboard](assets/ss_shoulder_dip.png)
 
 > More screenshots coming — elbow flare, shoulder dip, and shallow detection.
