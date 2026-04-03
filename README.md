@@ -9,12 +9,9 @@
   <a href="#"><img src="https://img.shields.io/badge/MediaPipe-BlazePose-green?logo=google&logoColor=white"/></a>
   <a href="#"><img src="https://img.shields.io/badge/LightGBM-Ensemble-orange"/></a>
   <a href="#"><img src="https://img.shields.io/badge/Flask-MJPEG_Stream-lightgrey?logo=flask&logoColor=white"/></a>
-  <a href="#"><img src="https://img.shields.io/badge/SHAP-Explainable_AI-purple"/></a>
+  <a href="#"><img src="https://img.shields.io/badge/Optuna-HPO-blueviolet"/></a>
   <a href="#"><img src="https://img.shields.io/badge/CV_Protocol-GroupKFold-red"/></a>
 </p>
-
-<p><em>SRM Institute of Science and Technology — Department of Computational Intelligence<br>VI Semester Minor Project | IEEE Paper Under Submission</em></p>
-
 </div>
 
 ---
@@ -192,7 +189,7 @@ RehabMate/
 ├── exercise_detector.py      # Position gating (4 conditions)
 ├── state_machine.py          # 6-state FSM + rep counter
 ├── user_calibration.py       # 5-rep calibration + per-subject offsets
-├── lgbm_classifier.py        # LightGBM + RF ensemble + SHAP
+├── lgbm_classifier.py        # LightGBM + RF soft-voting ensemble
 │
 ├── ── Training & Evaluation ─────────────────────────────────────
 ├── train_pipeline.py         # Optuna HPO + StratifiedGroupKFold training
